@@ -1,0 +1,358 @@
+#compdef terraform
+
+# Potential improvements:
+# - Better completion for plan files
+# - Better completion for terraform config directories?
+# - Completion for resources
+# - completion for variables?
+
+_terraform_cmds() {
+  local cmds=(
+    'apply:Builds or changes infrastructure'
+    'console:Interactive console for Terraform interpolations'
+    'destroy:Destroy Terraform-managed infrastructure'
+    'fmt:Rewrites config files to canonical format'
+    'get:Download and install modules for the configuration'
+    'graph:Create a visual graph of Terraform resources'
+    'import:Import existing infrastructure into Terraform'
+    'init:Initialize a Terraform working directory'
+    'output:Read an output from a state file'
+    'plan:Generate and show an execution plan'
+    'providers:Prints a tree of the providers used in the configuration'
+    'refresh:Update local state file against real resources'
+    'show:Inspect Terraform state or plan'
+    'taint:Manually mark a resource for recreation'
+    'untaint:Manually unmark a resource as tainted'
+    'validate:Validates the Terraform files'
+    'version:Prints the Terraform version'
+    'workspace:Workspace management'
+    '0.12upgrade:Rewrites pre-0.12 module source code for v0.12'
+    'debug:Debug output management (experimental)'
+    'force-unlock:Manually unlock the terraform state'
+    'state:Advanced state management'
+  )
+  _describe -t commands 'common terraform commands' cmds "$@"
+}
+
+_terraform_resource() {
+  # TODO: do actual completion here
+  _message "Terraform resource address"
+}
+
+_terraform-apply() {
+  _arguments \
+    '-backup=[Path to backup the existing state file before modifying]:path' \
+    '-auto-approve[Skip interactive approval of plan before applying]' \
+    '-lock=[Lock the state file]: :(false true)' \
+    '-lock-timeout=[Duration to retry a state lock]:timeout' \
+    '-input=[Ask for input for variables if not directly set]: :(false true)' \
+    '-no-color[Suppress color in output]' \
+    '-parallelism=[Limit the number of parallel resource operations]:n' \
+    '-refresh=[Update state prior to checking for differences]: :(false true)' \
+    '-state=[Path to read and save state]:path:_files' \
+    '-state-out=[Path to write state to that is different han -state]:path:_files' \
+    '*-target=[Resource to target]:resource:_terraform_resource' \
+    '*-var=[Set a variable in the Terraform configuration]:assignment' \
+    '-var-file=[Set variables in the configuration from a file]:path:_files' \
+    '::dir-or-plan:_path_files'
+}
+
+_terraform-console() {
+  _arguments \
+    '-state=[Path to read state]:path:_files' \
+    '-var=[Set a variable in the configuration]:assignment' \
+    '-var-file=[Set variables from a file]:path:_files' \
+    '::dir:_path_files -/'
+}
+
+_terraform-destroy() {
+  _arguments \
+    '-backup=[Path to backup the existing state file before modifying]:path' \
+    '-auto-approve[Skip interactive approval of plan before applying]' \
+    '-lock=[Lock the state file]: :(false true)' \
+    '-lock-timeout=[Duration to retry a state lock]:timeout' \
+    "-no-color[If specified, output won't contain any color]" \
+    '-parallelism=[Limit the number of parallel resource operations]:n' \
+    '-refresh=[Update state prior to checking for differences]: :(false true)' \
+    '-state=[Path to read and save state]:path:_files' \
+    '-state-out=[Path to write state to that is different han -state]:path:_files' \
+    '*-target=[Resource to target]:resource:_terraform_resource' \
+    '*-var=[Set a variable in the Terraform configuration]:assignment' \
+    '-var-file=[Set variables in the configuration from a file]:path:_files' \
+    '::dir:_path_files -/'
+}
+
+_terraform-fmt() {
+  _arguments \
+    "-list=[Whether to list files whose formatting differs]: :(false true)" \
+    '-write=[Whether to write to source files]: :(false true)' \
+    '-diff[Display diffs of formatting changes]' \
+    '-check[Check if the input is formatted]' \
+    '-recursive[Also process files in subdirectories]' \
+    '::dir:_path_files -/'
+}
+
+_terraform-get() {
+  _arguments \
+    '-update[Check already-downloaded modules for available updates]' \
+    '-no-color[Disable text coloring in the output]' \
+    '::path:_path_files -/'
+}
+
+_terraform-graph() {
+  _arguments \
+    '-draw-cycles[Highlight any cycles in the graph]' \
+    '-module-depth=[Specifies the depth of the modules to show in the output]:n' \
+    '-type=[Type of graph to output]:type:(plan plan-destroy apply validate input refresh)' \
+    '::dir:_path_files -/'
+}
+
+_terraform-import() {
+  _arguments \
+    '-backup=[Path to backup the existing state file before modifying]:path:_files' \
+    '-config=[Path to config directory]:path:_path_files -/' \
+    '-allow-missing-config[Allow import when no resource configuration exists]' \
+    '-input=[Ask for input for variables if not directly set]: :(false true)' \
+    '-lock=[Lock the state file]: :(false true)' \
+    '-lock-timeout=[Duration to retry a state lock]:timeout' \
+    '-no-color[Suppress color in output]' \
+    '-provider=[Specific provider to use for import]:provider' \
+    '-state=[Path to read and save state]:path:_files' \
+    '-state-out=[Path to write state to that is different han -state]:path:_files' \
+    '*-target=[Resource to target]:resource:_terraform_resource' \
+    '*-var=[Set a variable in the Terraform configuration]:assignment' \
+    '-var-file=[Set variables in the configuration from a file]:path:_files' \
+    ':resource:_terraform_resource' \
+    ':id'
+}
+
+_terraform-init() {
+  _arguments \
+    '-backend=[Configure backend]: :(false true)' \
+    '*-backend-config=[Override for backend configuration]: : _alternative path\:path\:_files assignment\:assignment' \
+    '-force-copy[Suppress prompts about copying state data]' \
+    '-from-module=[Copy contents of the given module into target directory]:source:_path_files -/' \
+    '-get=[Download any modules]: :(false true)' \
+    '-get-plugins=[Download any missing plugins]: :(false true)' \
+    '-input=[Ask for input if necessary]: :(false true)' \
+    '-lock=[Lock the state file]: :(false true)' \
+    '-lock-timeout=[Duration to retry a state lock]:timeout' \
+    '-no-color[Suppress color in output]' \
+    '-plugin-dir=[Directory containing plugin binaries]:path:_path_files -/' \
+    '-reconfigure[Reconfigure the backend]' \
+    '-upgrade=[Ignore previously installed objects and install latest]: :(false true)' \
+    '-verify-plugins=[Verify authenticity and integrity of plugins]: :(false true)' \
+    '::dir:_path_files -/'
+}
+
+_terraform-output() {
+  _arguments \
+    '-state=[Path to the state file to read]:path:_files' \
+    '-no-color[Suppress color in output' \
+    '-json[Print output in JSON]' \
+    ':output'
+}
+
+_terraform-plan() {
+  _arguments \
+    '-destroy[Generate plan to destroy all resources]' \
+    '-detailed-exitcode[Return detailed exit codes when command exits]' \
+    '-input=[Ask for input for variables if not directly set]: :(false true)' \
+    '-lock=[Lock the state file]: :(false true)' \
+    '-lock-timeout=[Duration to retry a state lock]:timeout' \
+    '-no-color[Suppress color in output]' \
+    '-out=[Write a plan file to the given path]:path:_files' \
+    '-parallelism=[Limit the number of parallel resource operations]:n' \
+    '-refresh=[Update state prior to checking for differences]: :(false true)' \
+    '-state=[Path to read and save state]:path:_files' \
+    '*-target=[Resource to target]:resource:_terraform_resource' \
+    '*-var=[Set a variable in the Terraform configuration]:assignment' \
+    '-var-file=[Set variables in the configuration from a file]:path:_files' \
+    '::dir:_path_files -/'
+}
+
+_terraform-providers() {
+  if [[ $CURRENT -eq 2 ]]; then
+    _alternative 'path:dir:_path_files -/' 'command:subcommand:compadd -S" -json" schema'
+  elif [[ $CURRENT -eq 3 && $words[2] = schema ]]; then
+    compadd -- '-json'
+  fi
+}
+
+_terraform-refresh() {
+  _arguments \
+    '-backup=[Path to backup the existing state file before modifying]:path:_files' \
+    '-input=[Ask for input for variables if not directly set]: :(false true)' \
+    '-lock=[Lock the state file]: :(false true)' \
+    '-lock-timeout=[Duration to retry a state lock]:timeout' \
+    '-no-color[Suppress color in output]' \
+    '-state=[Path to read and save state]:path:_files' \
+    '-state-out=[Path to write state to that is different han -state]:path:_files' \
+    '*-target=[Resource to target]:resource:_terraform_resource' \
+    '*-var=[Set a variable in the Terraform configuration]:assignment' \
+    '-var-file=[Set variables in the configuration from a file]:path:_files' \
+    '::dir:_path_files -/'
+}
+
+_terraform-show() {
+  _arguments \
+    '-no-color[Suppres color in output]' \
+    '-json[Print output as JSON]' \
+    '::path:_files'
+}
+
+_terraform-taint() {
+  _arguments \
+    '-allow-missing[Succeed even if the resource is missing]' \
+    '-backup=[Path to backup the existing state file before modifying]:path:_files' \
+    '-lock=[Lock the state file]: :(false true)' \
+    '-lock-timeout=[Duration to retry a state lock]:timeout' \
+    '-state=[Path to read and save state]:path:_files' \
+    '-state-out=[Path to write state to that is different han -state]:path:_files' \
+    ':resource:_terraform_resource'
+}
+
+_terraform-untaint() {
+  _arguments \
+    '-allow-missing[Succeed even if the resource is missing]' \
+    '-backup=[Path to backup the existing state file before modifying]:path:_files' \
+    '-lock=[Lock the state file]: :(false true)' \
+    '-lock-timeout=[Duration to retry a state lock]:timeout' \
+    '-module=[Module path where the resource lives]:path:_path_files -/' \
+    '-state=[Path to read and save state]:path:_files' \
+    '-state-out=[Path to write state to that is different han -state]:path:_files' \
+    ':resource:_terraform_resource'
+}
+
+_terraform-validate() {
+  _arguments '-json[Print output as JSON]'
+}
+
+_terraform-workspace() {
+  if [[ $CURRENT -eq 2 ]]; then
+    local cmds=(
+      'delete:Delete a workspace'
+      'list:List workspaces'
+      'new:Create a workspace'
+      'select:Select a workspace'
+      'show:Show the name of the current workspace'
+    )
+    _describe -t commands 'workspace command' cmds
+  else
+    cmd=${words[2]}
+    compset -n 2
+    case $cmd in
+      (new|delete)
+        _arguments \
+          '-lock=[Lock the state file]: :(false true)' \
+          '-lock-timeout=[Duration to retry a state lock]:timeout' \
+          '-state=[Copy an existing state file into the new workspace]:path:_files' \
+          ':name' '::dir:_path_files -/'
+        ;;
+      (list)
+        [[ $CURRENT -eq 2 ]] && _path_files -/
+        ;;
+      (select)
+        _arguments ':name' '::dir:_path_files -/'
+        ;;
+    esac
+  fi
+}
+
+_terraform-0.12upgrade() {
+  _arguments \
+    '-yes[Skip the initial introduction messages]' \
+    '-force[Override the heuristic to detect if a configuration is already written for v0.12]' \
+    ':module-dir:_path_files -/'
+}
+
+_terraform-debug() {
+  case $CURRENT in
+    2) compadd -t subcommand json2dot ;;
+    3) _files ;;
+  esac
+}
+
+_terraform-force-unlock() {
+  _arguments '-force[Skip confirmation input]' ':lock-id' '::dir:_path_files -/'
+}
+
+_terraform-state() {
+  local context curcontext="$curcontext" state state_descr line
+  integer ret=1
+  typeset -A opt_args
+  subcommands=(
+    'list:List resources in the state'
+    'mv:Move an item in the state'
+    'pull:Pull current state and output to stdout'
+    'push:Update remote state from a local state file'
+    'rm:Remove instances from the state'
+    'show:Show a resource in the state'
+  )
+  _arguments -C ":subcommand: _describe subcommand subcommands" '*:: :->args' && ret=0
+  if [[ $state = args ]]; then
+    curcontext="${curcontext%:*:*}:terraform-state-$line[1]:"
+    _call_function ret _terraform-state-${line[1]} && ret=0
+  fi
+  return ret
+}
+
+_terraform-state-list() {
+  _arguments \
+    '-state=[Path to a terraform state file]:statefile:_files' \
+    '-id=[Filter the results by id of instances]:ID' \
+    '*:address:_terraform_resource'
+}
+
+_terraform-state-mv() {
+  _arguments \
+    '-dry-run[Print out what would be moved without actually moving anything]' \
+    '-backup=[Path to write backup of original state]:path:_files' \
+    '-backup-out=[Path to write backup for destination state]:path:_files' \
+    '-lock=[Lock the state files]: :(false true)' \
+    '-lock-timeout=[Duration to retry a state lock]:timeout' \
+    '-state=[Path the source state]:path:_files' \
+    '-state-out=[Path to destination state file]:path:_files' \
+    ':source:_terraform_resource' ':destination:_terraform_resource'
+}
+
+_terraform-state-push() {
+  _arguments \
+    '-force[Force writing state regardless of lineage]' \
+    '-lock=[Lock the state file]: :(false true)' \
+    '-lock-timeout=[Duration to retry a state lock]:timeout' \
+    ':path:_files'
+}
+
+_terraform-state-rm() {
+  _arguments \
+    '-dry-run[Print out what would be removed without actually removing anything]' \
+    '-backup=[Path to write backup of original state]:path:_files' \
+    '-lock=[Lock the state files]: :(false true)' \
+    '-lock-timeout=[Duration to retry a state lock]:timeout' \
+    '-state=[Path the source state]:path:_files' \
+    '*:address:_terraform_resource'
+}
+
+_terraform-state-show() {
+  _arguments '-state=[Path to a terraform state file]:statefile:_files' ':address:_terraform_resource'
+}
+
+_terraform() {
+  local context curcontext="$curcontext" state state_descr line
+  integer ret=1
+  typeset -A opt_args
+  _arguments -C '(- :)-version' '(-)-help' \
+    '1:command:_terraform_cmds' \
+    '*:: :->args' && ret=0
+
+  if [[ $state = args ]]; then
+    curcontext="${curcontext%:*:*}:terraform-$line[1]:"
+    _call_function ret _terraform-${line[1]} && ret=0
+    (( ret )) && _message "no more arguments"
+  fi
+
+  return ret
+}
+
+_terraform "$@"
