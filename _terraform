@@ -8,28 +8,29 @@
 
 _terraform_cmds() {
   local cmds=(
+    'init:Initialize a Terraform working directory'
+    'validate:Validates the Terraform files'
+    'plan:Generate and show an execution plan'
     'apply:Builds or changes infrastructure'
-    'console:Interactive console for Terraform interpolations'
     'destroy:Destroy Terraform-managed infrastructure'
+
+    'console:Interactive console for Terraform interpolations'
     'fmt:Rewrites config files to canonical format'
+    'force-unlock:Release a stuck lock on the current workspace'
     'get:Download and install modules for the configuration'
     'graph:Create a visual graph of Terraform resources'
     'import:Import existing infrastructure into Terraform'
-    'init:Initialize a Terraform working directory'
+    'login:Obtain and save credentials for a remote host'
+    'logout:Remove locally stored credentials for a remote host'
     'output:Read an output from a state file'
-    'plan:Generate and show an execution plan'
     'providers:Prints a tree of the providers used in the configuration'
     'refresh:Update local state file against real resources'
     'show:Inspect Terraform state or plan'
+    'state:Advanced state management'
     'taint:Manually mark a resource for recreation'
     'untaint:Manually unmark a resource as tainted'
-    'validate:Validates the Terraform files'
     'version:Prints the Terraform version'
     'workspace:Workspace management'
-    '0.12upgrade:Rewrites pre-0.12 module source code for v0.12'
-    'debug:Debug output management (experimental)'
-    'force-unlock:Manually unlock the terraform state'
-    'state:Advanced state management'
   )
   _describe -t commands 'common terraform commands' cmds "$@"
 }
@@ -41,45 +42,42 @@ _terraform_resource() {
 
 _terraform-apply() {
   _arguments \
-    '-backup=[Path to backup the existing state file before modifying]:path' \
+    '(:)-destroy[Destroy all resources]' \
+    '(:)-refresh-only[Only update state to match remote resources]' \
+    '(:)-refresh=[Update state prior to checking for differences]: :(false true)' \
+    '(:)*-replace=[Force replacement of a resource]:resource:_terraform_resource' \
+    '(:)*-target=[Resource to target]:resource:_terraform_resource' \
+    '(:)*-var=[Set a variable in the Terraform configuration]:assignment' \
+    '(:)-var-file=[Set variables in the configuration from a file]:path:_files' \
     '-auto-approve[Skip interactive approval of plan before applying]' \
+    '-compact-warnings[Show warnings in more compact form]' \
     '-lock=[Lock the state file]: :(false true)' \
     '-lock-timeout=[Duration to retry a state lock]:timeout' \
     '-input=[Ask for input for variables if not directly set]: :(false true)' \
     '-no-color[Suppress color in output]' \
     '-parallelism=[Limit the number of parallel resource operations]:n' \
-    '-refresh=[Update state prior to checking for differences]: :(false true)' \
-    '-state=[Path to read and save state]:path:_files' \
-    '-state-out=[Path to write state to that is different han -state]:path:_files' \
-    '*-target=[Resource to target]:resource:_terraform_resource' \
-    '*-var=[Set a variable in the Terraform configuration]:assignment' \
-    '-var-file=[Set variables in the configuration from a file]:path:_files' \
-    '::dir-or-plan:_path_files'
+    '::plan-file:_files'
 }
 
 _terraform-console() {
   _arguments \
-    '-state=[Path to read state]:path:_files' \
     '-var=[Set a variable in the configuration]:assignment' \
-    '-var-file=[Set variables from a file]:path:_files' \
-    '::dir:_path_files -/'
+    '-var-file=[Set variables from a file]:path:_files'
 }
 
 _terraform-destroy() {
   _arguments \
-    '-backup=[Path to backup the existing state file before modifying]:path' \
-    '-auto-approve[Skip interactive approval of plan before applying]' \
-    '-lock=[Lock the state file]: :(false true)' \
-    '-lock-timeout=[Duration to retry a state lock]:timeout' \
-    "-no-color[If specified, output won't contain any color]" \
-    '-parallelism=[Limit the number of parallel resource operations]:n' \
     '-refresh=[Update state prior to checking for differences]: :(false true)' \
-    '-state=[Path to read and save state]:path:_files' \
-    '-state-out=[Path to write state to that is different han -state]:path:_files' \
     '*-target=[Resource to target]:resource:_terraform_resource' \
     '*-var=[Set a variable in the Terraform configuration]:assignment' \
     '-var-file=[Set variables in the configuration from a file]:path:_files' \
-    '::dir:_path_files -/'
+    '-auto-approve[Skip interactive approval of plan before applying]' \
+    '-compact-warnings[Show warnings in more compact form]' \
+    '-lock=[Lock the state file]: :(false true)' \
+    '-lock-timeout=[Duration to retry a state lock]:timeout' \
+    '-input=[Ask for input for variables if not directly set]: :(false true)' \
+    '-no-color[Suppress color in output]' \
+    '-parallelism=[Limit the number of parallel resource operations]:n' \
 }
 
 _terraform-fmt() {
@@ -89,39 +87,34 @@ _terraform-fmt() {
     '-diff[Display diffs of formatting changes]' \
     '-check[Check if the input is formatted]' \
     '-recursive[Also process files in subdirectories]' \
-    '::dir:_path_files -/'
+    '*::target:_files'
 }
 
 _terraform-get() {
   _arguments \
     '-update[Check already-downloaded modules for available updates]' \
-    '-no-color[Disable text coloring in the output]' \
-    '::path:_path_files -/'
+    '-no-color[Disable text coloring in the output]'
 }
 
 _terraform-graph() {
   _arguments \
+    '-plan=[Use specified plan file]:tfplan:_files' \
     '-draw-cycles[Highlight any cycles in the graph]' \
     '-module-depth=[Specifies the depth of the modules to show in the output]:n' \
-    '-type=[Type of graph to output]:type:(plan plan-destroy apply validate input refresh)' \
-    '::dir:_path_files -/'
+    '-type=[Type of graph to output]:type:(plan plan-destroy apply validate input refresh)'
 }
 
 _terraform-import() {
   _arguments \
-    '-backup=[Path to backup the existing state file before modifying]:path:_files' \
-    '-config=[Path to config directory]:path:_path_files -/' \
+    '-config=[Path to config directory]:path:_files -/' \
     '-allow-missing-config[Allow import when no resource configuration exists]' \
     '-input=[Ask for input for variables if not directly set]: :(false true)' \
     '-lock=[Lock the state file]: :(false true)' \
     '-lock-timeout=[Duration to retry a state lock]:timeout' \
     '-no-color[Suppress color in output]' \
-    '-provider=[Specific provider to use for import]:provider' \
-    '-state=[Path to read and save state]:path:_files' \
-    '-state-out=[Path to write state to that is different han -state]:path:_files' \
-    '*-target=[Resource to target]:resource:_terraform_resource' \
     '*-var=[Set a variable in the Terraform configuration]:assignment' \
     '-var-file=[Set variables in the configuration from a file]:path:_files' \
+    '-ignore-remote-version' \
     ':resource:_terraform_resource' \
     ':id'
 }
@@ -131,67 +124,97 @@ _terraform-init() {
     '-backend=[Configure backend]: :(false true)' \
     '*-backend-config=[Override for backend configuration]: : _alternative path\:path\:_files assignment\:assignment' \
     '-force-copy[Suppress prompts about copying state data]' \
-    '-from-module=[Copy contents of the given module into target directory]:source:_path_files -/' \
+    '-from-module=[Copy contents of the given module into target directory]:source:_files -/' \
     '-get=[Download any modules]: :(false true)' \
-    '-get-plugins=[Download any missing plugins]: :(false true)' \
     '-input=[Ask for input if necessary]: :(false true)' \
     '-lock=[Lock the state file]: :(false true)' \
     '-lock-timeout=[Duration to retry a state lock]:timeout' \
     '-no-color[Suppress color in output]' \
-    '-plugin-dir=[Directory containing plugin binaries]:path:_path_files -/' \
+    '-plugin-dir=[Directory containing plugin binaries]:path:_files -/' \
     '-reconfigure[Reconfigure the backend]' \
-    '-upgrade=[Ignore previously installed objects and install latest]: :(false true)' \
-    '-verify-plugins=[Verify authenticity and integrity of plugins]: :(false true)' \
-    '::dir:_path_files -/'
+    '-migrate-state[Attempt to migrate state to new backend]' \
+    '-upgrade[Ignore previously installed objects and install latest]' \
+    '-lockfile=[Set dependency lockfile mode]: :(readonly)' \
+    '-ignore-remote-version[Ignore checking that local and remote versions are compatible]'
+}
+
+_terraform-login() {
+  _arguments '::hostname:'
+}
+
+_terraform-logout() {
+  _arguments '::hostname:'
 }
 
 _terraform-output() {
   _arguments \
-    '-state=[Path to the state file to read]:path:_files' \
     '-no-color[Suppress color in output' \
-    '-json[Print output in JSON]' \
+    '-raw[Print raw string directly if possible]' \
     ':output'
 }
 
 _terraform-plan() {
   _arguments \
     '-destroy[Generate plan to destroy all resources]' \
+    '-refresh-only[Just check that remote objects match current state]' \
+    '-refresh=[Update state prior to checking for differences]: :(false true)' \
+    '*-replace=[Force replacement of a resource]:resource:_terraform_resource' \
+    '*-target=[Resource to target]:resource:_terraform_resource' \
+    '*-var=[Set a variable in the Terraform configuration]:assignment' \
+    '-var-file=[Set variables in the configuration from a file]:path:_files' \
+    '-compact-warnings[Show warnings in more compact form]' \
     '-detailed-exitcode[Return detailed exit codes when command exits]' \
     '-input=[Ask for input for variables if not directly set]: :(false true)' \
     '-lock=[Lock the state file]: :(false true)' \
     '-lock-timeout=[Duration to retry a state lock]:timeout' \
-    '-no-color[Suppress color in output]' \
     '-out=[Write a plan file to the given path]:path:_files' \
-    '-parallelism=[Limit the number of parallel resource operations]:n' \
-    '-refresh=[Update state prior to checking for differences]: :(false true)' \
-    '-state=[Path to read and save state]:path:_files' \
-    '*-target=[Resource to target]:resource:_terraform_resource' \
-    '*-var=[Set a variable in the Terraform configuration]:assignment' \
-    '-var-file=[Set variables in the configuration from a file]:path:_files' \
-    '::dir:_path_files -/'
+    '-no-color[Suppress color in output]' \
+    '-parallelism=[Limit the number of parallel resource operations]:n'
 }
 
 _terraform-providers() {
-  if [[ $CURRENT -eq 2 ]]; then
-    _alternative 'path:dir:_path_files -/' 'command:subcommand:compadd -S" -json" schema'
-  elif [[ $CURRENT -eq 3 && $words[2] = schema ]]; then
-    compadd -- '-json'
+  local context state state_descr line
+  integer ret=1
+  typeset -A opt_args
+  local subcommands=(
+    'lock:"Write out dependency locks"'
+    'mirror:"Save local copies of providers"'
+    'schema:"Show schemas for the providers used"'
+  )
+
+  _arguments -C ":subcommand: _describe -t commands subcommand subcommands" '*:: :->args' && ret=0
+
+  if [[ $state = args ]]; then
+    local oses=(linux darwin windows freebsd)
+    local archs=(amd64 arm64 arm 386)
+    case "${line[1]}" in
+      lock)
+        _arguments \
+          '-fs-mirror=[Consult given filesystem mirror directory]:dir:_files -/' \
+          '-net-mirror=[Consult the given network mirror]:url:_message url' \
+          '-platform=[Choose target platform]:os_arch:_sep_parts oses _ archs'
+        ;;
+      mirror)
+        _arguments '-platform=[Choose target platform]:os_arch:_sep_parts oses _ archs'
+        ;;
+      schema)
+        (( CURRENT == 2 )) && compadd -- -json
+        ;;
+    esac
   fi
+  return ret
 }
 
 _terraform-refresh() {
   _arguments \
-    '-backup=[Path to backup the existing state file before modifying]:path:_files' \
+    '-compact-warnings[Show warnings in more compact form]' \
     '-input=[Ask for input for variables if not directly set]: :(false true)' \
     '-lock=[Lock the state file]: :(false true)' \
     '-lock-timeout=[Duration to retry a state lock]:timeout' \
     '-no-color[Suppress color in output]' \
-    '-state=[Path to read and save state]:path:_files' \
-    '-state-out=[Path to write state to that is different han -state]:path:_files' \
     '*-target=[Resource to target]:resource:_terraform_resource' \
     '*-var=[Set a variable in the Terraform configuration]:assignment' \
-    '-var-file=[Set variables in the configuration from a file]:path:_files' \
-    '::dir:_path_files -/'
+    '-var-file=[Set variables in the configuration from a file]:path:_files'
 }
 
 _terraform-show() {
@@ -204,28 +227,23 @@ _terraform-show() {
 _terraform-taint() {
   _arguments \
     '-allow-missing[Succeed even if the resource is missing]' \
-    '-backup=[Path to backup the existing state file before modifying]:path:_files' \
     '-lock=[Lock the state file]: :(false true)' \
     '-lock-timeout=[Duration to retry a state lock]:timeout' \
-    '-state=[Path to read and save state]:path:_files' \
-    '-state-out=[Path to write state to that is different han -state]:path:_files' \
+    '-ignore-remote-version' \
     ':resource:_terraform_resource'
 }
 
 _terraform-untaint() {
   _arguments \
     '-allow-missing[Succeed even if the resource is missing]' \
-    '-backup=[Path to backup the existing state file before modifying]:path:_files' \
     '-lock=[Lock the state file]: :(false true)' \
     '-lock-timeout=[Duration to retry a state lock]:timeout' \
-    '-module=[Module path where the resource lives]:path:_path_files -/' \
-    '-state=[Path to read and save state]:path:_files' \
-    '-state-out=[Path to write state to that is different han -state]:path:_files' \
+    '-ignore-remote-version' \
     ':resource:_terraform_resource'
 }
 
 _terraform-validate() {
-  _arguments '-json[Print output as JSON]'
+  _arguments '-json[Print output as JSON]' '-no-color[suppress color output]'
 }
 
 _terraform-workspace() {
@@ -246,35 +264,20 @@ _terraform-workspace() {
         _arguments \
           '-lock=[Lock the state file]: :(false true)' \
           '-lock-timeout=[Duration to retry a state lock]:timeout' \
-          '-state=[Copy an existing state file into the new workspace]:path:_files' \
-          ':name' '::dir:_path_files -/'
+          ':name' '::dir:_files -/'
         ;;
       (list)
-        [[ $CURRENT -eq 2 ]] && _path_files -/
+        [[ $CURRENT -eq 2 ]] && _files -/
         ;;
       (select)
-        _arguments ':name' '::dir:_path_files -/'
+        _arguments ':name' '::dir:_files -/'
         ;;
     esac
   fi
 }
 
-_terraform-0.12upgrade() {
-  _arguments \
-    '-yes[Skip the initial introduction messages]' \
-    '-force[Override the heuristic to detect if a configuration is already written for v0.12]' \
-    ':module-dir:_path_files -/'
-}
-
-_terraform-debug() {
-  case $CURRENT in
-    2) compadd -t subcommand json2dot ;;
-    3) _files ;;
-  esac
-}
-
 _terraform-force-unlock() {
-  _arguments '-force[Skip confirmation input]' ':lock-id' '::dir:_path_files -/'
+  _arguments '-force[Skip confirmation input]' ':lock-id'
 }
 
 _terraform-state() {
@@ -286,6 +289,7 @@ _terraform-state() {
     'mv:Move an item in the state'
     'pull:Pull current state and output to stdout'
     'push:Update remote state from a local state file'
+    'replace-provider:Replace provider for resources'
     'rm:Remove instances from the state'
     'show:Show a resource in the state'
   )
@@ -299,7 +303,6 @@ _terraform-state() {
 
 _terraform-state-list() {
   _arguments \
-    '-state=[Path to a terraform state file]:statefile:_files' \
     '-id=[Filter the results by id of instances]:ID' \
     '*:address:_terraform_resource'
 }
@@ -307,12 +310,9 @@ _terraform-state-list() {
 _terraform-state-mv() {
   _arguments \
     '-dry-run[Print out what would be moved without actually moving anything]' \
-    '-backup=[Path to write backup of original state]:path:_files' \
-    '-backup-out=[Path to write backup for destination state]:path:_files' \
     '-lock=[Lock the state files]: :(false true)' \
     '-lock-timeout=[Duration to retry a state lock]:timeout' \
-    '-state=[Path the source state]:path:_files' \
-    '-state-out=[Path to destination state file]:path:_files' \
+    '-ignore-remote-version' \
     ':source:_terraform_resource' ':destination:_terraform_resource'
 }
 
@@ -327,15 +327,23 @@ _terraform-state-push() {
 _terraform-state-rm() {
   _arguments \
     '-dry-run[Print out what would be removed without actually removing anything]' \
-    '-backup=[Path to write backup of original state]:path:_files' \
     '-lock=[Lock the state files]: :(false true)' \
     '-lock-timeout=[Duration to retry a state lock]:timeout' \
-    '-state=[Path the source state]:path:_files' \
+    '-ignore-remote-version' \
     '*:address:_terraform_resource'
 }
 
 _terraform-state-show() {
-  _arguments '-state=[Path to a terraform state file]:statefile:_files' ':address:_terraform_resource'
+  _arguments ':address:_terraform_resource'
+}
+
+_terraform-replace-provider() {
+  _arguments \
+    '-auto-approve[Skip interactive approval of plan before applying]' \
+    '-lock=[Lock the state files]: :(false true)' \
+    '-lock-timeout=[Duration to retry a state lock]:timeout' \
+    '-ignore-remote-version' \
+    ':from-provider-fqdn' ':to-provider-fqdn'
 }
 
 _terraform() {
@@ -343,6 +351,7 @@ _terraform() {
   integer ret=1
   typeset -A opt_args
   _arguments -C '(- :)-version' '(-)-help' \
+    '-chdir=[Switch to different working directory]:dir:_files -/' \
     '1:command:_terraform_cmds' \
     '*:: :->args' && ret=0
 
